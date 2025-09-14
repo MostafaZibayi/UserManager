@@ -1,7 +1,15 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import axios from "axios";
-import { Box, Flex, Spinner, Text, useToast, VStack } from "@chakra-ui/react";
+import {
+	Box,
+	Center,
+	Flex,
+	Spinner,
+	Text,
+	useToast,
+	VStack,
+} from "@chakra-ui/react";
 import type { TUsers } from "./types/user";
 import UsersTable from "./table/UsersTable";
 import ThemeToggleButton from "./components/ToggleThemeButton";
@@ -46,8 +54,7 @@ function App() {
 		fetchData();
 	}, []);
 	return (
-		<div className="flex  w-full">
-			<ThemeToggleButton />
+		<Center minH="100dvh">
 			{isDrawerOpen && (
 				<DrawerEdit
 					isOpen={isDrawerOpen}
@@ -57,15 +64,16 @@ function App() {
 				/>
 			)}
 			{users ? (
-				<Box>
+				<Box flex={1}>
+					<ThemeToggleButton />
 					{users.length > 0 ? (
-						<VStack>
-							<UsersTable
-								data={users}
-								handleEditClick={handleEditClick}
-							/>
-						</VStack>
+						// <VStack>
+						<UsersTable
+							data={users}
+							handleEditClick={handleEditClick}
+						/>
 					) : (
+						// </VStack>
 						<Text fontSize="lg" mb={4}>
 							شخصی یافت نشد
 						</Text>
@@ -88,7 +96,7 @@ function App() {
 					)}
 				</Flex>
 			)}
-		</div>
+		</Center>
 	);
 }
 

@@ -20,6 +20,7 @@ type Props = {
 	onClose: () => void;
 };
 
+//تعریف محدودیت ورودی ها از طریق yup
 const schema = yup.object({
 	name: yup.string().required("نام الزامی است").min(3, "حداقل ۳ کاراکتر"),
 	email: yup
@@ -29,11 +30,13 @@ const schema = yup.object({
 	phone: yup.number().required("شماره تماس الزامی است"),
 	company: yup.string().required("نام شرکت الزامی است"),
 });
+// تعریف تایپ داده های فرم بر اساس اسکمای تعریف شده
 type FormValues = yup.InferType<typeof schema>;
 
 const UserForm: React.FC<Props> = ({ initData, setUsers, onClose }) => {
 	const toast = useToast();
 
+	//بررسی مقادیر اولیه
 	const initialValues: FormValues = {
 		name: initData.name ?? "",
 		email: initData.email ?? "",
@@ -54,36 +57,37 @@ const UserForm: React.FC<Props> = ({ initData, setUsers, onClose }) => {
 				company: { ...initData.company, name: values.company },
 			};
 
-			await axios.put(
+			const { status } = await axios.put(
 				`https://jsonplaceholder.typicode.com/users/${initData.id}`,
-				payload,
-				{
-					headers: {
-						"Content-Type": "application/json; charset=UTF-8",
-					},
-				}
+				payload
 			);
-
-			setUsers((prev) =>
-				prev.map((u) =>
-					u.id === initData.id
-						? {
-								...u,
-								...payload,
-								company: { ...u.company, name: values.company },
-						  }
-						: u
-				)
-			);
-			onClose();
-			toast({
-				title: "با موفقیت ویرایش شد",
-				status: "success",
-				duration: 2500,
-				isClosable: true,
-				position: "top",
-			});
-			resetForm({ values });
+			if (status === 200) {
+				setUsers((prev) =>
+					prev.map((u) =>
+						u.id === initData.id
+							? {
+									...u,
+									...payload,
+									company: {
+										...u.company,
+										name: values.company,
+									},
+							  }
+							: u
+					)
+				);
+				onClose();
+				toast({
+					title: "با موفقیت ویرایش شد",
+					status: "success",
+					duration: 2500,
+					isClosable: true,
+					position: "top",
+				});
+				resetForm({ values });
+			} else {
+				new Error("مشکل در ارتباط با سرور");
+			}
 		} catch (err: any) {
 			toast({
 				title: "خطا در ویرایش",
@@ -114,7 +118,6 @@ const UserForm: React.FC<Props> = ({ initData, setUsers, onClose }) => {
 	return (
 		<Formik<FormValues>
 			initialValues={initialValues}
-			enableReinitialize
 			validationSchema={schema}
 			onSubmit={handleSubmit}
 			validateOnBlur
@@ -144,7 +147,6 @@ const UserForm: React.FC<Props> = ({ initData, setUsers, onClose }) => {
 								name="email"
 								type="email"
 								placeholder="email@example.com"
-								dir="ltr"
 							/>
 							<FormErrorMessage>{errors.email}</FormErrorMessage>
 						</FormControl>
@@ -156,8 +158,7 @@ const UserForm: React.FC<Props> = ({ initData, setUsers, onClose }) => {
 							<Field
 								as={Input}
 								name="phone"
-								dir="ltr"
-								placeholder="+98 912 000 0000"
+								placeholder="05145789632"
 							/>
 							<FormErrorMessage>{errors.phone}</FormErrorMessage>
 						</FormControl>
@@ -179,7 +180,7 @@ const UserForm: React.FC<Props> = ({ initData, setUsers, onClose }) => {
 						<Button
 							isLoading={isSubmitting}
 							type="submit"
-							colorScheme="purple"
+							colorScheme="teal"
 							w="full"
 							mt={4}
 							onClick={async () => {

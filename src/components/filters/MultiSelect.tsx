@@ -35,7 +35,7 @@ const MultiSelect: React.FC<Props> = ({ label, options, values, onChange }) => {
 					{label}
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent w={{ base: "calc(100vw - 2rem)", md: "sm" }}>
+			<PopoverContent w="sm">
 				<PopoverArrow />
 				<PopoverCloseButton />
 				<PopoverBody>

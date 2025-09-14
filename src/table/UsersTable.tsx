@@ -16,9 +16,11 @@ import {
 import { uniqSorted } from "../utils/sorter";
 import FilterBar from "../components/filters/FilterBar";
 import type { IUser, TUsers } from "../types/user";
+import EditIcon from "../assets/edit.svg?react";
+
 type Props = { data: TUsers; handleEditClick: (item: IUser) => void };
 const UsersTable: React.FC<Props> = ({ data, handleEditClick }) => {
-	// چک باکس های چندانتخابی
+	// آماده کردن گزینه ها برای انتخاب چند گزینه ای شرکت ها و سپس شهر ها
 	const companyOptions = React.useMemo(
 		() =>
 			uniqSorted(
@@ -41,7 +43,46 @@ const UsersTable: React.FC<Props> = ({ data, handleEditClick }) => {
 	const [companies, setCompanies] = React.useState<string[]>([]);
 	const [cities, setCities] = React.useState<string[]>([]);
 
-	//لغو سرچ
+	// خواندن فیلترها از لوکال استورج هنگام لود کامپوننت
+	const STORAGE_KEY = "users_filters";
+	React.useEffect(() => {
+		try {
+			const raw = localStorage.getItem(STORAGE_KEY);
+			if (!raw) return;
+			const f = JSON.parse(raw) as {
+				name?: string;
+				email?: string;
+				phone?: string;
+				companies?: string[];
+				cities?: string[];
+			};
+			setName_Srch(f.name ?? "");
+			setEmail_Srch(f.email ?? "");
+			setPhone_Srch(f.phone ?? "");
+			setCompanies(f.companies ?? []);
+			setCities(f.cities ?? []);
+		} catch {
+			console.log("Error while reading filters from storage!");
+		}
+	}, []);
+
+	// ذخیره سازی فیلترها در لوکال استورج هنگام تغییر
+	React.useEffect(() => {
+		const f = {
+			name: name_Srch,
+			email: email_Srch,
+			phone: phone_Srch,
+			companies,
+			cities,
+		};
+		try {
+			localStorage.setItem(STORAGE_KEY, JSON.stringify(f));
+		} catch {
+			console.log("Error while writing filters into storage!");
+		}
+	}, [name_Srch, email_Srch, phone_Srch, companies, cities]);
+
+	//لغو و پاکسازی سرچ
 	const reset = () => {
 		setName_Srch("");
 		setEmail_Srch("");
@@ -50,6 +91,9 @@ const UsersTable: React.FC<Props> = ({ data, handleEditClick }) => {
 		setCities([]);
 	};
 
+	// فیلتر کردن داده ها بر اساس مقادیر سرچ
+	// استفاده از useMemo برای بهینه سازی و جلوگیری از فیلتر شدن بی مورد
+	// داده ها در هر رندر
 	const filtered = React.useMemo(() => {
 		return data
 			.filter((u) => {
@@ -89,6 +133,7 @@ const UsersTable: React.FC<Props> = ({ data, handleEditClick }) => {
 				onReset={reset}
 				resultCount={filtered.length}
 			/>
+			{/* نمایش جدول فقط اگر داده ای برای نمایش وجود داشته باشد*/}
 			{filtered.length > 0 ? (
 				<TableContainer
 					borderWidth="1px"
@@ -111,33 +156,16 @@ const UsersTable: React.FC<Props> = ({ data, handleEditClick }) => {
 								<Tr key={item.id}>
 									<Td>{item.name}</Td>
 									<Td maxW="280px">
-										<Text dir="ltr" noOfLines={1}>
-											{item.email}
-										</Text>
+										<Text noOfLines={1}>{item.email}</Text>
 									</Td>
 									<Td maxW="200px">
-										<Text dir="ltr">{item.phone}</Text>
+										<Text>{item.phone}</Text>
 									</Td>
 									<Td>{item.company?.name ?? "-"}</Td>
 									<Td>{item.address?.city ?? "-"}</Td>
 									<Td>
 										<IconButton
-											icon={
-												<svg
-													xmlns="http://www.w3.org/2000/svg"
-													viewBox="0 0 24 24"
-													fill="currentColor"
-													width="24"
-													height="24"
-												>
-													<path
-														d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.153 1.153 3.712 3.712 
-           1.153-1.153a2.625 2.625 0 000-3.712zM19.44 8.095l-3.712-3.712-9.66 
-           9.66a5.25 5.25 0 00-1.378 2.362l-.516 2.062a.75.75 0 00.91.91l2.062
-           -.516a5.25 5.25 0 002.362-1.378l9.66-9.66z"
-													/>
-												</svg>
-											}
+											icon={<EditIcon />}
 											aria-label="ویرایش"
 											size="lg"
 											onClick={() => {

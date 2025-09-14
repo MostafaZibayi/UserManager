@@ -75,7 +75,6 @@ const FilterBar: React.FC<Props> = ({
 						size="sm"
 						variant="filled"
 						placeholder="جستجوی ایمیل"
-						dir="ltr"
 						value={email}
 						onChange={(e) => onEmailChange(e.target.value)}
 					/>
@@ -89,7 +88,6 @@ const FilterBar: React.FC<Props> = ({
 						size="sm"
 						variant="filled"
 						placeholder="جستجوی شماره تماس"
-						dir="ltr"
 						value={phone}
 						onChange={(e) => onPhoneChange(e.target.value)}
 					/>
